@@ -1,0 +1,16 @@
+Mon Aug 20 11:31:39 DST 2018
+
+Test #1 - Namespace creation
+namespace/testspace created
+
+Test #2 - Pod & image Pull
+pod/image-pull-test created
+error: error parsing STDIN: error converting YAML to JSON: yaml: line 5: mapping values are not allowed in this context
+error: unable to recognize "STDIN": no matches for kind "DaemonSet" in version "v1"
+error: error validating "STDIN": error validating data: [ValidationError(DaemonSet.metadata.labels): invalid type for io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.labels: got "string", expected "map", ValidationError(DaemonSet.spec.selector.matchLabels): invalid type for io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector.matchLabels: got "string", expected "map", ValidationError(DaemonSet.spec.template.metadata): unknown field "lables" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta]; if you choose to ignore these errors, turn validation off with --validate=false
+error: error validating "STDIN": error validating data: ValidationError(DaemonSet.spec.template.metadata): unknown field "lables" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta; if you choose to ignore these errors, turn validation off with --validate=false
+Error from server (NotFound): error when creating "STDIN": namespaces "testspace" not found
+daemonset.apps/ping-daemons created
+The DaemonSet "ping-daemons" is invalid: spec.template.spec.restartPolicy: Unsupported value: "Never": supported values: "Always"
+pod/image-pull-test created
+The DaemonSet "ping-daemons" is invalid: spec.template.spec.restartPolicy: Unsupported value: "Never": supported values: "Always"
