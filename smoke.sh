@@ -7,16 +7,16 @@ BLUE='\033[1;34m'
 PRPL='\033[1;35m'
 
 > results.txt
-# echo -e '-------------------- Testing Kube Components --------------------'
+ echo -e '-------------------- Testing Kube Components --------------------'
 
 
-# date >> results.txt
+date >> results.txt
 
-# echo -e "\n--------Test #1 - Namespace creation--------" 
+echo -e "\n--------Test #1 - Namespace creation--------" 
 
-# echo -e "\n >>>>>>>>>> Creating Namespace"
+echo -e "\n >>>>>>>>>> Creating Namespace"
 
-# kubectl create namespace testspace 
+kubectl create namespace testspace 
 
 # echo -e "\n--------Test #2 - Pod & image Pull--------" 
 
@@ -96,13 +96,113 @@ kubectl get pods -n testspace | grep ping-daemons | awk '{print $1}'
 
 # kubectl exec -n testspace $(get_ping_pods | tail -1) -it -- ping -c 4 $(get_ping_ips | head -1) 
 
-echo -e "\n--------Test #4 - Public DNS Lookup--------" 
+# echo -e "\n--------Test #4 - Public DNS Lookup--------" 
 
-for i in $(get_ping_pods)
-do
-    echo -e "\n>>>>Testing Public DNS lookup on $i\n"
-    kubectl exec -n testspace $i -- nslookup google.com
-done
+# for i in $(get_ping_pods)
+# do
+#     echo -e "\n>>>>Testing Public DNS lookup on $i\n"
+#     kubectl exec -n testspace $i -- nslookup google.com
+# done
+
+
+
+    
+
+# Test 5 deployment constructor
+function t5_deploy_constr() {
+
+echo -e "\n--------Test #5 Deployment Tests--------" 
+
+echo -e "\n>>>>Creating Deployment for Testing\n"
+cat << EOF | kubectl create -f - 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: testspace
+  name: deploy-test
+  labels:
+    deploy: test
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      deploy: test
+  template:
+    metadata:
+      labels:
+        deploy: test
+    spec:
+      containers:
+      - name: deploy-test-pod
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+EOF
+
+}
+
+
+#Variable to get pods
+t5_pods="kubectl get po -n testspace -l deploy=test"
+
+
+#Test 5 get deployment
+function t5_get_deploy(){
+    
+    kubectl get deploy -n testspace deploy-test
+}
+
+#Test 5 watches the changes on the deployment pods for 30sec
+function t5_watch_deploy(){
+  timeout 30 $t5_pods --watch
+}
+
+
+#Test 5 peforms a rolloing update of the image
+function t5_deploy_img_upd(){
+  
+  kubectl set image -n testspace deploy/deploy-test  deploy-test-pod=nginx:1.9.1 --record
+  echo -e "\n"
+  kubectl rollout status deployment/deploy-test  -n testspace
+  echo -e "\n"
+  t5_watch_deploy
+  echo -e "\n"
+  t5_deploy_hist
+
+}
+
+
+#Test 5 Function to see the rollout history of the deployment
+function t5_deploy_hist(){
+
+  kubectl rollout history -n testspace deploy/deploy-test 
+}
+
+
+#Test 5 Deployment pod deletion and recreation by the RC test
+function t5_pod_deletion_tst(){
+  
+  kubectl delete pod -n testspace $($t5_pods | tail -1 | awk '{print $1}')
+  echo -e "\n"
+  t5_watch_deploy
+  echo -e "\n"
+  t5_get_deploy
+
+}
+
+#Test 5 deploy rescale test
+function t5_deploy_rescale(){
+
+  kubectl scale deploy deploy-test -n testspace --replicas=6
+   echo -e "\n"
+  t5_get_deploy
+   echo -e "\n"
+  t5_watch_deploy
+   echo -e "\n"
+  t5_get_deploy
+
+}
+
 
 
 

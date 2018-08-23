@@ -1,18 +1,50 @@
+-------------------- Testing Kube Components --------------------
+Wed Aug 22 16:00:42 DST 2018
 
->>>>Testing Public DNS lookup on ping-daemons-mb9gs
+--------Test #1 - Namespace creation--------
 
-Server:    10.0.0.10
-Address 1: 10.0.0.10 kube-dns.kube-system.svc.cluster.local
+ >>>>>>>>>> Creating Namespace
 
-Name:      google.com
-Address 1: 2607:f8b0:4005:807::200e sfo07s16-in-x0e.1e100.net
-Address 2: 216.58.195.78 sfo07s16-in-f78.1e100.net
+--------Test #5 Deployment Tests--------
 
->>>>Testing Public DNS lookup on ping-daemons-twfjk
+>>>>Creating Deployment for Testing
 
-Server:    10.0.0.10
-Address 1: 10.0.0.10 kube-dns.kube-system.svc.cluster.local
+deployment.apps/deploy-test created
+deployment.extensions/deploy-test image updated
 
-Name:      google.com
-Address 1: 2607:f8b0:4005:807::200e sfo07s16-in-x0e.1e100.net
-Address 2: 216.58.195.78 sfo07s16-in-f78.1e100.net
+
+Waiting for deployment "deploy-test" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "deploy-test" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "deploy-test" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "deploy-test" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "deploy-test" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "deploy-test" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "deploy-test" rollout to finish: 1 old replicas are pending termination...
+deployment "deploy-test" successfully rolled out
+
+
+
+
+deployments "deploy-test"
+REVISION  CHANGE-CAUSE
+1         <none>
+2         kubectl set image deploy/deploy-test deploy-test-pod=nginx:1.9.1 --namespace=testspace --record=true
+
+deployment.extensions/deploy-test scaled
+
+
+NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deploy-test   6         6         6            3           26s
+
+
+
+
+NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deploy-test   6         6         6            3           27s
+pod "deploy-test-68d7758fcc-zswx5" deleted
+
+
+
+
+NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deploy-test   6         6         6            6           37s
