@@ -16,7 +16,11 @@ echo -e "\n--------Test #1 - Namespace creation--------"
 
 echo -e "\n >>>>>>>>>> Creating Namespace"
 
+function namespace_create(){
+
 kubectl create namespace testspace 
+
+}
 
 # echo -e "\n--------Test #2 - Pod & image Pull--------" 
 
@@ -106,7 +110,7 @@ kubectl get pods -n testspace | grep ping-daemons | awk '{print $1}'
 
 
 
-    
+#Test 5 Deployment functions-----------------------------------------------------------------------------------------------------------------------------------------------   
 
 # Test 5 deployment constructor
 function t5_deploy_constr() {
@@ -203,7 +207,39 @@ function t5_deploy_rescale(){
 
 }
 
+#End of Test 5---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+#Test 6 Services functions---------------------------------------------------------------------------------------------------------------------------------------------------
 
+function t6_svc_constr(){
 
+  cat << EOF | kubectl create -f -
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: testspace
+  name: test-service
+spec:
+  selector:
+    test: service
+  ports:
+  - protocol: TCP
+    port: 80
+EOF
+
+}
+
+function t6_svc_ep(){
+ 
+  kubectl get ep test-service -n testspace 
+  echo -e "\n"
+  kubectl get ep test-service -n testspace -o yaml
+
+}
+
+function t6_svc_pod_constr(){
+
+  cat << EOF | kubectl create -f -
+
+}
 } | tee -a results.txt
