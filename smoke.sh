@@ -240,6 +240,75 @@ function t6_svc_ep(){
 function t6_svc_pod_constr(){
 
   cat << EOF | kubectl create -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: testspace
+  name: svc-deploy
+  labels:
+    test: service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      test: service
+  template:
+    metadata:
+      labels:
+        test: service
+    spec:
+      containers:
+      - name: svc-test-pods
+        image: httpd
+        ports:
+        - containerPort: 80
+EOF
 
+cat << EOF | kubectl create -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: testspace
+  name: curl-pod
+spec:
+  restartPolicy: Never
+  containers:
+  - name: image-test
+    image: dsalamanca/netshell
+    imagePullPolicy: Always
+    args:
+    - sleep
+    - "1000" 
+
+EOF
+
+}
+
+function t6_svc_dns_test(){
+
+kubectl exec -n testspace curl-pod -- curl -v test-service
+
+}
+
+#End of Test 6 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#Test 7 Kube-system Status------------------------------------------------------------------------------------------------------------------------------------------------
+
+function t7_get_nodes(){
+  kubectl get nodes -o wide
+  echo -e "\n"
+  kubectl get nodes -o yaml
+}
+
+function t7_tunnel(){
+  kubectl get deploy -n kube-system tunnelfront
+  echo -e "-n"
+  kubectl describe pod -n kube-system -l component=tunnel
+  kubectl logs -n kube-system -l component=tunnel > tunnel.log
+  echo -e "\nTunnelfront pod logs have been saved under tunnel.log"
+}
+
+function t7_kubedns(){
+  
 }
 } | tee -a results.txt
