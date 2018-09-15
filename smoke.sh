@@ -295,12 +295,14 @@ kubectl exec -n testspace curl-pod -- curl -v test-service
 #Test 7 Kube-system Status------------------------------------------------------------------------------------------------------------------------------------------------
 
 function t7_get_nodes(){
+
   kubectl get nodes -o wide
   echo -e "\n"
   kubectl get nodes -o yaml
 }
 
 function t7_tunnel(){
+
   kubectl get deploy -n kube-system tunnelfront
   echo -e "-n"
   kubectl describe pod -n kube-system -l component=tunnel
@@ -309,6 +311,25 @@ function t7_tunnel(){
 }
 
 function t7_kubedns(){
+
+  kubectl get deploy -n kube-system kube-dns-v20
+  echo -e "\n"
+  kubectl get deploy -n kube-system kube-dns-v20
+  echo -e "\n"
+  kubectl get pods -n kube-system -l k8s-app=kube-dns
+  echo -e "KUBEDNS CONTAINER--------------------------------\n" > kube-dns.log
+  kubectl logs -n kube-system -l k8s-app=kube-dns -c kubedns >> kube-dns.log
+  echo -e "\nDNSMASQ CONTAINER--------------------------------\n" >> kube-dns.log
+  kubectl logs -n kube-system -l k8s-app=kube-dns -c dnsmasq >> kube-dns.log
+  echo -e "\nkube-dns Logs saved under kube-dns.log"
   
 }
+
+function t7_etcd_health(){
+
+  kubectl get cs etcd-0
+
+}
+
+
 } | tee -a results.txt
