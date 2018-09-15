@@ -331,5 +331,69 @@ function t7_etcd_health(){
 
 }
 
+#End of Test 7 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#Test 8 Storage tests ------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+function t8_get_strg_cls(){
+
+  kubectl describe sc 
+
+}
+
+function t8_pv_constr(){
+
+  cat << EOF | kubectl create -f - 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: testspace
+  name: test-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: managed-premium
+  resources:
+    requests:
+      storage: 5Gi
+EOF
+
+}
+
+function t8_get_pvc(){
+
+  echo -e "Persistent Volume\n"
+  kubectl get pv -n testspace
+  echo -e "\n"
+  kubectl describe pv -n testspace 
+  echo -e "Persistent Volume Claim:\n"
+  kubectl get pvc -n testspace
+  echo -e "\n"
+  kubectl describe pvc -n testspace
+
+}
+
+
+function t8_pod_pvc(){
+
+  cat << EOF | kubectl create -f -
+kind: Pod
+apiVersion: v1
+metadata:
+  namespace: testspace
+  name: pvc-pod
+spec:
+  containers:
+    - name: pvc-cont
+      image: alpine
+      volumeMounts:
+      - mountPath: "/mnt/azure"
+        name: volume
+  volumes:
+    - name: volume
+      persistentVolumeClaim:
+        claimName: test-pvc
+
+}
 
 } | tee -a results.txt
