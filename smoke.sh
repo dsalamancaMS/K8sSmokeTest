@@ -393,6 +393,7 @@ spec:
     - name: volume
       persistentVolumeClaim:
         claimName: test-pvc
+EOF
 
 }
 
