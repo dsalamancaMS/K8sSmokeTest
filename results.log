@@ -1,0 +1,27 @@
+Sat Sep 15 19:44:19 DST 2018
+[1;34mTesting Network between Pods
+[0m
+
+>>>>Testing connectivity from ping-daemons-46jhx to ping-daemons-p4c66
+
+PING 10.244.2.46 (10.244.2.46): 56 data bytes
+64 bytes from 10.244.2.46: seq=0 ttl=62 time=1.071 ms
+64 bytes from 10.244.2.46: seq=1 ttl=62 time=0.760 ms
+64 bytes from 10.244.2.46: seq=2 ttl=62 time=0.647 ms
+64 bytes from 10.244.2.46: seq=3 ttl=62 time=0.859 ms
+
+--- 10.244.2.46 ping statistics ---
+4 packets transmitted, 4 packets received, 0% packet loss
+round-trip min/avg/max = 0.647/0.834/1.071 ms
+
+>>>>Testing connectivity from ping-daemons-46jhx to ping-daemons-p4c66
+
+PING 10.244.3.63 (10.244.3.63): 56 data bytes
+64 bytes from 10.244.3.63: seq=0 ttl=62 time=0.984 ms
+64 bytes from 10.244.3.63: seq=1 ttl=62 time=1.312 ms
+64 bytes from 10.244.3.63: seq=2 ttl=62 time=0.865 ms
+64 bytes from 10.244.3.63: seq=3 ttl=62 time=0.989 ms
+
+--- 10.244.3.63 ping statistics ---
+4 packets transmitted, 4 packets received, 0% packet loss
+round-trip min/avg/max = 0.865/1.037/1.312 ms

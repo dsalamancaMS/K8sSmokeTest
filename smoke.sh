@@ -1,14 +1,10 @@
 #!/bin/bash
-{
+
 NC='\033[0m'
 GREEN='\033[1;32m'
 RED='\033[1;31m'
 BLUE='\033[1;34m'
 PRPL='\033[1;35m'
-
-> results.txt
-
-date >> results.txt
 
 #echo -e "\n--------Test #1 - Namespace creation--------" 
 
@@ -37,8 +33,20 @@ spec:
     imagePullPolicy: Always
     args:
     - echo
-    - "success" 
+    - "Successfully Pulled Image and Exited Container" 
 EOF
+}
+
+function t2_get_pod(){
+ 
+ timeout 10 kubectl get pod -n testspace image-pull-test --watch
+
+}
+
+function t2_get_logs(){
+  
+  kubectl logs -n testspace image-pull-test  
+
 }
 
 # echo -e "\n--------Test #3 - Communication Between Pods--------" 
@@ -90,24 +98,31 @@ kubectl get pods -n testspace | grep ping-daemons | awk '{print $1}'
 
 }
 
-function t3_pint_test(){
+function t3_ping_test(){
   
-  echo -e "\n>>>>Testing connectivity from $(get_ping_pods | head -1) to $(get_ping_pods | tail -1)\n" 
+  echo -e "\n>>>>Testing connectivity from $(t3_get_ping_pods | head -1) to $(t3_get_ping_pods | tail -1)\n" 
 
-  kubectl exec -n testspace $(get_ping_pods | head -1) -it -- ping -c 4 $(get_ping_ips | tail -1)  
+  kubectl exec -n testspace $(t3_get_ping_pods | head -1) -it -- ping -c 4 $(t3_get_ping_ips | tail -1)  
 
-  echo -e "\n>>>>Testing connectivity from $(get_ping_pods | head -1) to $(get_ping_pods | tail -1)\n" 
+  echo -e "\n>>>>Testing connectivity from $(t3_get_ping_pods | head -1) to $(t3_get_ping_pods | tail -1)\n" 
 
-  kubectl exec -n testspace $(get_ping_pods | tail -1) -it -- ping -c 4 $(get_ping_ips | head -1) 
+  kubectl exec -n testspace $(t3_get_ping_pods | tail -1) -it -- ping -c 4 $(t3_get_ping_ips | head -1) 
 
 }
 
+function t3_watch_pods(){
+
+  kubectl get ds -n testspace
+  timeout 20 kubectl get pods -n testspace -l ping=pods --watch
+
+}
 
 # echo -e "\n--------Test #4 - Public DNS Lookup--------" 
 
 function t4_dns_tst(){
-
-  for i in $(get_ping_pods)
+  t3_demon_constr 2>&1 /dev/null
+  sleep 15
+  for i in $(t3_get_ping_pods)
   do
      echo -e "\n>>>>Testing Public DNS lookup on $i\n"
      kubectl exec -n testspace $i -- nslookup google.com
@@ -409,4 +424,107 @@ sleep 20
 
 }
 
-} | tee -a results.txt
+function cleanup(){
+
+echo -e "${RED}Cleaning up Kubernetes Cluster after tests.\nThis might take a while...$NC"
+kubectl delete pod image-pull-test -n testspace
+kubectl delete ds -n testspace ping-daemons
+kubectl delete deploy -n testspace deploy-test
+kubectl delete svc -n testspace test-service
+kubectl delete deploy -n testspace svc-deploy
+kubectl delete pod -n testspace curl-pod
+kubectl delete pod -n testspace pvc-pod
+kubectl delete pvc -n testspace --all
+kubectl delete pv -n testspace --all
+kubectl delete namespace testspace
+
+}
+ 
+function print_menu(){
+
+echo -e "\n$GREEN*************************************************************
+
+$NC -------------------------- MENU ---------------------------
+
+ 1) Test Image pulling 
+ 2) Test Pod Network
+ 3) Test Public DNS Resolution
+ 4) Test Deployment Functions
+ 5) Test Service Functions
+ 6) Check Kube-System
+ 7) Test Persistent Storage
+ 8) Exit Menu
+
+ $NC-------------------------- MENU ---------------------------
+
+$GREEN*************************************************************\n$NC"
+
+}
+
+function menu_opt1(){
+  
+  date >> results.log
+  echo -e "${BLUE}Testing Image Pull Capabilities\n$NC" | tee -a results.log
+  t2_img_pull
+  echo -e "\n${BLUE}Waiting for Pod to be created$NC"
+  t2_get_pod
+  echo -e "\n${BLUE}Gathering Logs from test$NC"
+  t2_get_logs | tee -a results.log
+  echo -e "\n"
+  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  read -p "Press enter to go back to the menu..."
+}
+
+function menu_opt2(){
+  
+  date >> results.log
+  echo -e "${BLUE}Testing Network between Pods\n$NC" | tee -a results.log
+  t3_demon_constr
+  echo -e "\n"
+  echo -e "${BLUE}Waiting for Pods to be created on each node (20 sec)$NC"
+  t3_watch_pods
+  echo -e $PRPL
+  t3_ping_test | tee -a results.log
+  echo -e $NC
+  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  read -p "Press enter to go back to the menu..."
+
+}
+
+function menu_opt3(){
+ 
+  date >> results.log
+  echo -e "${BLUE}Testing External DNS resolution from Pods\n$NC" | tee -a results.log
+  echo -e "${BLUE}Waiting for Pods to be created on each node (15 seconds)$NC"
+  t4_dns_tst | tee -a results.log
+  echo -e "\n"
+  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  read -p "Press enter to go back to the menu..."
+}
+
+function main(){
+> results.log
+echo -e "${RED}Creating namespace for tests...$NC"
+t1_namespc_crt 2>&1 /dev/null
+  while true; do
+    clear
+    print_menu
+    read -p "Please select an option: " option
+    clear
+
+    case $option in
+
+       "1") menu_opt1;;
+       "2") menu_opt2;;
+       "3") menu_opt3;;
+       "4") menu_opt4;;
+       "8") cleanup 2> /dev/null;break;; 
+       *) echo -e "${RED}You Selected an invalid option; Please try again.$NC\n";read -p "Press enter to continue...";;
+   
+    esac
+  done
+}
+
+
+clear
+main
