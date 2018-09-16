@@ -135,8 +135,6 @@ function t4_dns_tst(){
 # Test 5 deployment constructor
 function t5_deploy_constr() {
 
-echo -e "\n--------Test #5 Deployment Tests--------" 
-
 echo -e "\n>>>>Creating Deployment for Testing\n"
 cat << EOF | kubectl create -f - 
 apiVersion: apps/v1
@@ -178,7 +176,7 @@ function t5_get_deploy(){
 
 #Test 5 watches the changes on the deployment pods for 30sec
 function t5_watch_deploy(){
-  timeout 30 $t5_pods --watch
+  timeout 20 $t5_pods --watch
 }
 
 
@@ -290,6 +288,8 @@ kind: Pod
 metadata:
   namespace: testspace
   name: curl-pod
+  labels:
+    curl: pod
 spec:
   restartPolicy: Never
   containers:
@@ -310,6 +310,14 @@ kubectl exec -n testspace curl-pod -- curl -v test-service
 
 }
 
+function t6_svc_watch_pods(){
+
+  kubectl get svc -n testspace
+  echo -e "\n"
+  timeout 20 kubectl get pods -n testspace -l test=service,curl=pod --watch
+
+}
+
 #End of Test 6 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #Test 7 Kube-system Status------------------------------------------------------------------------------------------------------------------------------------------------
@@ -326,8 +334,9 @@ function t7_tunnel(){
   kubectl get deploy -n kube-system tunnelfront
   echo -e "-n"
   kubectl describe pod -n kube-system -l component=tunnel
-  kubectl logs -n kube-system -l component=tunnel > tunnel.log
-  echo -e "\nTunnelfront pod logs have been saved under tunnel.log"
+  echo -e "\n${PRPL}Tunnelfront pod logs---------------------------\n$NC" 
+  kubectl logs -n kube-system -l component=tunnel 
+
 }
 
 function t7_kubedns(){
@@ -337,11 +346,10 @@ function t7_kubedns(){
   kubectl get deploy -n kube-system kube-dns-v20
   echo -e "\n"
   kubectl get pods -n kube-system -l k8s-app=kube-dns
-  echo -e "KUBEDNS CONTAINER--------------------------------\n" > kube-dns.log
-  kubectl logs -n kube-system -l k8s-app=kube-dns -c kubedns >> kube-dns.log
-  echo -e "\nDNSMASQ CONTAINER--------------------------------\n" >> kube-dns.log
-  kubectl logs -n kube-system -l k8s-app=kube-dns -c dnsmasq >> kube-dns.log
-  echo -e "\nkube-dns Logs saved under kube-dns.log"
+  echo -e "${PRPL}KUBEDNS CONTAINER--------------------------------\n$NC" 
+  kubectl logs -n kube-system -l k8s-app=kube-dns -c kubedns 
+  echo -e "${PRPL}\nDNSMASQ CONTAINER--------------------------------\n$NC" 
+  kubectl logs -n kube-system -l k8s-app=kube-dns -c dnsmasq 
   
 }
 
@@ -357,6 +365,8 @@ function t7_etcd_health(){
 
 function t8_get_strg_cls(){
 
+  kubectl get sc
+  echo -e "\n"
   kubectl describe sc 
 
 }
@@ -402,6 +412,8 @@ apiVersion: v1
 metadata:
   namespace: testspace
   name: pvc-pod
+  labels:
+    pvc: pod
 spec:
   containers:
     - name: pvc-cont
@@ -418,9 +430,17 @@ spec:
         claimName: test-pvc
 EOF
 
-echo -e "Waiting for Pod to be Created. This might take around 15 sec or more"
+}
 
-sleep 20
+function t8_get_pod_pvc(){
+
+  timeout 20 kubectl get pod -n testspace -l pvc=pod --watch
+
+}
+
+function t8_describe_pod(){
+
+  kubectl describe pod -n testspace -l pvc=pod
 
 }
 
@@ -500,6 +520,80 @@ function menu_opt3(){
   echo -e "\n"
   echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
   read -p "Press enter to go back to the menu..."
+
+}
+
+function menu_opt4(){
+
+  date >> results.log
+  echo -e "${BLUE}Starting to test all Deployment functions\n$NC" | tee -a results.log
+  t5_deploy_constr
+  echo -e "${BLUE}\nWaiting for deployment to be created (20 sec)\n$NC"
+  t5_watch_deploy
+  echo -e "${BLUE}\nTesting image update capabilities (20 sec)\n$NC"| tee -a results.log
+  t5_deploy_img_upd | tee -a results.log
+  echo -e "${BLUE}\nTesting Pod failure (20 sec)\n$NC"| tee -a results.log
+  t5_pod_deletion_tst | tee -a results.log
+  echo -e "${BLUE}\nTesting Deployment rescale\n$NC"| tee -a results.log
+  t5_deploy_rescale | tee -a results.log
+  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  read -p "Press enter to go back to the menu..."
+  
+}
+
+function menu_opt5(){
+
+  date >> results.log
+  echo -e "${BLUE}Starting to test Service Functions\n$NC" | tee -a results.log
+  echo -e "${BLUE}\nWaiting for Pods and Service to be created (20 sec)\n$NC"
+  t6_svc_constr
+  t6_svc_pod_constr
+  t6_svc_watch_pods
+  echo -e "${BLUE}\nChecking Service Endpoints\n$NC" | tee -a results.log
+  t6_svc_ep | tee -a results.log
+  echo -e "${BLUE}\nChecking Service DNS resolution\n$NC" | tee -a results.log
+  t6_svc_dns_test | tee -a results.log
+  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  read -p "Press enter to go back to the menu..."
+
+}
+
+function menu_opt6(){
+
+  date >> results.log
+  echo -e "${BLUE}Collecting Kube-System Information\n$NC" | tee -a results.log
+  echo -e "${BLUE}Kubernetes Nodes\n$NC"  | tee -a results.log
+  t7_get_nodes  | tee -a results.log
+  echo -e "${BLUE}ETCD Health\n$NC" | tee -a results.log
+  t7_etcd_health | tee -a results.log
+  echo -e "${BLUE}Kube-DNS logs and health status\n$NC"| tee -a results.log
+  t7_kubedns | tee -a results.log
+  echo -e "${BLUE}Tunnelfront Pod Health and logs \n$NC" | tee -a results.log
+  t7_tunnel | tee -a results.log
+  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  read -p "Press enter to go back to the menu..."
+
+}
+
+function menu_opt7(){
+
+  date >> results.log
+  echo -e "${BLUE}Starting Persistent Storage tests\n$NC" | tee -a results.log
+  echo -e "${PRPL}Querying Available Storage Classes\n$NC"| tee -a results.log
+  t8_get_strg_cls | tee -a results.log
+  echo -e "${PRPL}\nCreating Persistent Volume (20 sec)\n$NC"
+  t8_pv_constr
+  sleep 20
+  t8_get_pvc | tee -a results.log
+  echo -e "${PRPL}\nCreating Pod with Persistent Volume Claim (20 sec)\n$NC"
+  t8_pod_pvc
+  echo -e "\n"
+  t8_get_pod_pvc
+  echo -e "${PRPL}\nPod Description$NC" | tee -a results.log
+  t8_describe_pod | tee -a results.log
+  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  read -p "Press enter to go back to the menu..." 
+
 }
 
 function main(){
@@ -518,6 +612,9 @@ t1_namespc_crt 2>&1 /dev/null
        "2") menu_opt2;;
        "3") menu_opt3;;
        "4") menu_opt4;;
+       "5") menu_opt5;;
+       "6") menu_opt6;;
+       "7") menu_opt7;;
        "8") cleanup 2> /dev/null;break;; 
        *) echo -e "${RED}You Selected an invalid option; Please try again.$NC\n";read -p "Press enter to continue...";;
    
