@@ -597,7 +597,7 @@ function menu_opt7(){
 }
 
 function main(){
-> results.log
+
 echo -e "${RED}Creating namespace for tests...$NC"
 t1_namespc_crt 2>&1 /dev/null
   while true; do
