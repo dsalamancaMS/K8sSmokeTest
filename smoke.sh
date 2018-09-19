@@ -711,7 +711,7 @@ t1_namespc_crt 2>&1 /dev/null
 clear
 trap ctrl_c SIGINT
 function ctrl_c() {
-        echo -e "$RED\n>>>Trapped CTRL\n$NC"
+        echo -e "$RED\nCTRL+C Detected, Starting Cluster Clean Up\n$NC"
         cleanup 2> /dev/null
         break
 }
