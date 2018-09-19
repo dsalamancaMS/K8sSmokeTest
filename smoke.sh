@@ -444,6 +444,72 @@ function t8_describe_pod(){
 
 }
 
+### Gather Node logs ---------------------------------------------------------------------------------------------------------
+
+t9_constructor(){
+
+    cat << EOF | kubectl create -f - 
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  namespace: testspace
+  name: log-demons
+  labels:
+    log: demon
+spec:
+  selector:
+    matchLabels:
+      log: demon
+  template:
+    metadata:
+      labels:
+        log: demon
+    spec:
+      volumes:
+      - name: demon-volume
+        hostPath:
+          path: /var/log/
+          type: Directory
+      containers:
+      - name: log-pod
+        image: busybox:1.27
+        volumeMounts:
+        - mountPath: /demon-logs
+          name: demon-volume
+        args:
+        - sleep
+        - "10000"
+EOF
+
+}
+
+t9_get_log_demon(){
+
+  kubectl get pod -n testspace -l log=demon | grep log | awk {'print $1'}
+
+}
+
+t9_tar_log(){
+
+  for i in $(t9_get_log_demon)
+  do
+    kubectl exec -n testspace $i -- tar cvzf /logs.tgz /demon-logs
+  done
+
+}
+
+#/var/log/syslog var/log/azure/cluster-provision.log /var/log/cloud init-output 
+function t9_get_node_logs(){
+
+  t9_tar_log
+  for i in $(t9_get_log_demon)
+  do
+    NODE=$(kubectl get pod -n testspace ${i} -o wide | tail -1 | awk {'print $7'})
+    kubectl cp testspace/${i}:/logs.tgz $PWD/${NODE}-node-logs.tgz
+  done
+
+}
+
 function cleanup(){
 
 echo -e "${RED}Cleaning up Kubernetes Cluster after tests.\nThis might take a while...$NC"
@@ -473,7 +539,8 @@ $NC -------------------------- MENU ---------------------------
  5) Test Service Functions
  6) Check Kube-System
  7) Test Persistent Storage
- 8) Exit Menu
+ 8) Gather Node Logs
+ 9) Exit Menu
 
  $NC-------------------------- MENU ---------------------------
 
@@ -596,6 +663,15 @@ function menu_opt7(){
 
 }
 
+function menu_opt8(){
+  
+  t9_constructor
+  sleep 20
+  t9_get_node_logs
+  read -p ""
+
+}
+
 function main(){
 
 echo -e "${RED}Creating namespace for tests...$NC"
@@ -615,7 +691,8 @@ t1_namespc_crt 2>&1 /dev/null
        "5") menu_opt5;;
        "6") menu_opt6;;
        "7") menu_opt7;;
-       "8") cleanup 2> /dev/null;break;; 
+       "8") menu_opt8;;
+       "9") cleanup 2> /dev/null;break;; 
        *) echo -e "${RED}You Selected an invalid option; Please try again.$NC\n";read -p "Press enter to continue...";;
    
     esac
