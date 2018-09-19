@@ -489,6 +489,12 @@ t9_get_log_demon(){
 
 }
 
+t9_watch_demons(){
+
+  timeout 20 kubectl get pod -n testspace -l log=demon --watch
+
+}
+
 t9_tar_log(){
 
   for i in $(t9_get_log_demon)
@@ -664,11 +670,13 @@ function menu_opt7(){
 }
 
 function menu_opt8(){
-  
+  echo -e "${BLUE}Creating Pods for log Gathering (25 sec)\n$NC"
   t9_constructor
-  sleep 20
+  t9_watch_demons
+  echo -e "${PRPL}\nGathering logs...\n$NC"
   t9_get_node_logs
-  read -p ""
+  echo -e "${GREEN}\nTest completed, logs saved on $PWD\n$NC"
+  read -p "Press enter to go back to the menu..."
 
 }
 
@@ -701,4 +709,11 @@ t1_namespc_crt 2>&1 /dev/null
 
 
 clear
+trap ctrl_c SIGINT
+function ctrl_c() {
+        echo -e "$RED\n>>>Trapped CTRL\n$NC"
+        cleanup 2> /dev/null
+        break
+}
+
 main
