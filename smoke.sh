@@ -557,21 +557,21 @@ $GREEN*************************************************************\n$NC"
 function menu_opt1(){
   
   date >> results.log
-  echo -e "${BLUE}Testing Image Pull Capabilities\n$NC" | tee -a results.log
+  echo -e "${BLUE}--------------------------- Testing Image Pull Capabilities ---------------------------\n$NC" | tee -a results.log
   t2_img_pull
   echo -e "\n${BLUE}Waiting for Pod to be created$NC"
   t2_get_pod
   echo -e "\n${BLUE}Gathering Logs from test$NC"
   t2_get_logs | tee -a results.log
   echo -e "\n"
-  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  echo -e "${GREEN}Test completed, logs saved on ${PWD}/results.log\n$NC"
   read -p "Press enter to go back to the menu..."
 }
 
 function menu_opt2(){
   
   date >> results.log
-  echo -e "${BLUE}Testing Network between Pods\n$NC" | tee -a results.log
+  echo -e "${BLUE}--------------------------- Testing Network between Pods ---------------------------\n$NC" | tee -a results.log
   t3_demon_constr
   echo -e "\n"
   echo -e "${BLUE}Waiting for Pods to be created on each node (20 sec)$NC"
@@ -579,7 +579,7 @@ function menu_opt2(){
   echo -e $PRPL
   t3_ping_test | tee -a results.log
   echo -e $NC
-  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  echo -e "${GREEN}Test completed, logs saved on ${PWD}/results.log\n$NC"
   read -p "Press enter to go back to the menu..."
 
 }
@@ -587,11 +587,11 @@ function menu_opt2(){
 function menu_opt3(){
  
   date >> results.log
-  echo -e "${BLUE}Testing External DNS resolution from Pods\n$NC" | tee -a results.log
+  echo -e "${BLUE}--------------------------- Testing External DNS resolution from Pods ---------------------------\n$NC" | tee -a results.log
   echo -e "${BLUE}Waiting for Pods to be created on each node (15 seconds)$NC"
   t4_dns_tst | tee -a results.log
   echo -e "\n"
-  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  echo -e "${GREEN}Test completed, logs saved on ${PWD}/results.log\n$NC"
   read -p "Press enter to go back to the menu..."
 
 }
@@ -599,7 +599,7 @@ function menu_opt3(){
 function menu_opt4(){
 
   date >> results.log
-  echo -e "${BLUE}Starting to test all Deployment functions\n$NC" | tee -a results.log
+  echo -e "${BLUE}--------------------------- Starting to test all Deployment functions ---------------------------\n$NC" | tee -a results.log
   t5_deploy_constr
   echo -e "${BLUE}\nWaiting for deployment to be created (20 sec)\n$NC"
   t5_watch_deploy
@@ -609,7 +609,7 @@ function menu_opt4(){
   t5_pod_deletion_tst | tee -a results.log
   echo -e "${BLUE}\nTesting Deployment rescale\n$NC"| tee -a results.log
   t5_deploy_rescale | tee -a results.log
-  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  echo -e "${GREEN}Test completed, logs saved on ${PWD}/results.log\n$NC"
   read -p "Press enter to go back to the menu..."
   
 }
@@ -617,7 +617,7 @@ function menu_opt4(){
 function menu_opt5(){
 
   date >> results.log
-  echo -e "${BLUE}Starting to test Service Functions\n$NC" | tee -a results.log
+  echo -e "${BLUE}--------------------------- Starting to test Service Functions ---------------------------\n$NC" | tee -a results.log
   echo -e "${BLUE}\nWaiting for Pods and Service to be created (20 sec)\n$NC"
   t6_svc_constr
   t6_svc_pod_constr
@@ -626,7 +626,7 @@ function menu_opt5(){
   t6_svc_ep | tee -a results.log
   echo -e "${BLUE}\nChecking Service DNS resolution\n$NC" | tee -a results.log
   t6_svc_dns_test | tee -a results.log
-  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  echo -e "${GREEN}Test completed, logs saved on ${PWD}/results.log\n$NC"
   read -p "Press enter to go back to the menu..."
 
 }
@@ -634,7 +634,7 @@ function menu_opt5(){
 function menu_opt6(){
 
   date >> results.log
-  echo -e "${BLUE}Collecting Kube-System Information\n$NC" | tee -a results.log
+  echo -e "${BLUE}--------------------------- Collecting Kube-System Information ---------------------------\n$NC" | tee -a results.log
   echo -e "${BLUE}Kubernetes Nodes\n$NC"  | tee -a results.log
   t7_get_nodes  | tee -a results.log
   echo -e "${BLUE}ETCD Health\n$NC" | tee -a results.log
@@ -643,7 +643,7 @@ function menu_opt6(){
   t7_kubedns | tee -a results.log
   echo -e "${BLUE}Tunnelfront Pod Health and logs \n$NC" | tee -a results.log
   t7_tunnel | tee -a results.log
-  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  echo -e "${GREEN}Test completed, logs saved on ${PWD}/results.log\n$NC"
   read -p "Press enter to go back to the menu..."
 
 }
@@ -651,7 +651,7 @@ function menu_opt6(){
 function menu_opt7(){
 
   date >> results.log
-  echo -e "${BLUE}Starting Persistent Storage tests\n$NC" | tee -a results.log
+  echo -e "${BLUE}--------------------------- Starting Persistent Storage tests ---------------------------\n$NC" | tee -a results.log
   echo -e "${PRPL}Querying Available Storage Classes\n$NC"| tee -a results.log
   t8_get_strg_cls | tee -a results.log
   echo -e "${PRPL}\nCreating Persistent Volume (20 sec)\n$NC"
@@ -664,7 +664,7 @@ function menu_opt7(){
   t8_get_pod_pvc
   echo -e "${PRPL}\nPod Description$NC" | tee -a results.log
   t8_describe_pod | tee -a results.log
-  echo -e "${GREEN}Test completed, logs saved on results.log\n$NC"
+  echo -e "${GREEN}Test completed, logs saved on ${PWD}/results.log\n$NC"
   read -p "Press enter to go back to the menu..." 
 
 }
