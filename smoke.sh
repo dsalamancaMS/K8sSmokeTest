@@ -717,3 +717,4 @@ function ctrl_c() {
 }
 
 main
+exec bash
