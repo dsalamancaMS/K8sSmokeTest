@@ -555,9 +555,9 @@ $GREEN*************************************************************\n$NC"
 }
 
 function print_date(){
-  echo -e "\n"
+  echo -e "\n" >> results.log
   date >> results.log
-  echo -e "\n"
+  echo -e "\n" >> results.log
 }
 
 function menu_opt1(){
