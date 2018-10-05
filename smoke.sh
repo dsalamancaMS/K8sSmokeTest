@@ -554,9 +554,15 @@ $GREEN*************************************************************\n$NC"
 
 }
 
+function print_date(){
+  echo -e "\n"
+  date >> results.log
+  echo -e "\n"
+}
+
 function menu_opt1(){
   
-  date >> results.log
+  print_date
   echo -e "${BLUE}--------------------------- Testing Image Pull Capabilities ---------------------------\n$NC" | tee -a results.log
   t2_img_pull
   echo -e "\n${BLUE}Waiting for Pod to be created$NC"
@@ -570,7 +576,7 @@ function menu_opt1(){
 
 function menu_opt2(){
   
-  date >> results.log
+  print_date
   echo -e "${BLUE}--------------------------- Testing Network between Pods ---------------------------\n$NC" | tee -a results.log
   t3_demon_constr
   echo -e "\n"
@@ -586,7 +592,7 @@ function menu_opt2(){
 
 function menu_opt3(){
  
-  date >> results.log
+  print_date
   echo -e "${BLUE}--------------------------- Testing External DNS resolution from Pods ---------------------------\n$NC" | tee -a results.log
   echo -e "${BLUE}Waiting for Pods to be created on each node (15 seconds)$NC"
   t4_dns_tst | tee -a results.log
@@ -598,7 +604,7 @@ function menu_opt3(){
 
 function menu_opt4(){
 
-  date >> results.log
+  print_date
   echo -e "${BLUE}--------------------------- Starting to test all Deployment functions ---------------------------\n$NC" | tee -a results.log
   t5_deploy_constr
   echo -e "${BLUE}\nWaiting for deployment to be created (20 sec)\n$NC"
@@ -616,7 +622,7 @@ function menu_opt4(){
 
 function menu_opt5(){
 
-  date >> results.log
+  print_date
   echo -e "${BLUE}--------------------------- Starting to test Service Functions ---------------------------\n$NC" | tee -a results.log
   echo -e "${BLUE}\nWaiting for Pods and Service to be created (20 sec)\n$NC"
   t6_svc_constr
@@ -633,7 +639,7 @@ function menu_opt5(){
 
 function menu_opt6(){
 
-  date >> results.log
+  print_date
   echo -e "${BLUE}--------------------------- Collecting Kube-System Information ---------------------------\n$NC" | tee -a results.log
   echo -e "${BLUE}Kubernetes Nodes\n$NC"  | tee -a results.log
   t7_get_nodes  | tee -a results.log
@@ -650,7 +656,7 @@ function menu_opt6(){
 
 function menu_opt7(){
 
-  date >> results.log
+  print_date
   echo -e "${BLUE}--------------------------- Starting Persistent Storage tests ---------------------------\n$NC" | tee -a results.log
   echo -e "${PRPL}Querying Available Storage Classes\n$NC"| tee -a results.log
   t8_get_strg_cls | tee -a results.log
